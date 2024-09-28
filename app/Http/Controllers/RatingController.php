@@ -7,21 +7,13 @@ use App\Models\Rating;
 
 class RatingController extends Controller
 {
-    public function getTopReview()
+    public function getTopReviews()
     {
-        $topReviews = Rating::select('course_id', 'review', 'rating')
-            ->with(['student:id,name', 'course:id,name'])
-            ->groupBy('course_id')
-            ->orderBy('rating', 'desc')
+        $topReviews = Rating::select('course_id', 'student_id', 'review')
+            ->with(['course:id,name', 'student:id,name'])
+            ->distinct('course_id')
             ->take(3)
-            ->get()
-            ->map(function ($rating) {
-                return [
-                    'student_name' => $rating->student->name,
-                    'course_name' => $rating->course->name,
-                    'review' => $rating->review,
-                ];
-            });
+            ->get();
 
         return response()->json($topReviews);
     }
