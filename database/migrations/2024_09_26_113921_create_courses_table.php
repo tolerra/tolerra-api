@@ -12,10 +12,10 @@ class CreateCoursesTable extends Migration
             $table->id();
             $table->string('name', 255);
             $table->string('slug', 255)->unique();
-            $table->foreignId('instructor_id')->constrained('users');
+            $table->foreignId('instructor_id')->constrained('users')->onDelete('cascade');
             $table->text('desc');
             $table->text('brief')->nullable();
-            $table->foreignId('category_id')->constrained('categories');
+            $table->foreignId('category_id')->constrained('categories')->onDelete('cascade');
             $table->boolean('isValidated')->default(false);
             $table->string('image')->nullable();
             $table->timestamps();

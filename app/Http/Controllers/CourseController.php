@@ -9,7 +9,7 @@ class CourseController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function recomendation()
+    public function getRecommendation()
     {
         $courses = Course::with(['instructor', 'category'])
             ->limit(4)
@@ -37,35 +37,40 @@ class CourseController extends Controller
         ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function getCourse(Request $request)
     {
-        //
-    }
+        $user = $request->user();
+        $query = Course::with(['instructor', 'category']);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
+        if ($request->has('search')) {
+            $search = $request->input('search');
+            $query->where('name', 'like', "%{$search}%");
+        }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
+        $courses = $query->get()->map(function ($course) use ($user) {
+            if ($user && $user->courses->contains($course->id)) {
+                return null;
+            }
+            return [
+                'id' => $course->id,
+                'name' => $course->name,
+                'slug' => $course->slug,
+                'instructor_id' => $course->instructor_id,
+                'instructor_name' => $course->instructor->name,
+                'category_id' => $course->category_id,
+                'category_name' => $course->category->name,
+                'description' => $course->description,
+                'brief' => $course->brief,
+                'image' => env('BASE_URL') . 'images/' . $course->image,
+                'average_rating' => number_format($course->averageRating(), 1),
+                'created_at' => $course->created_at,
+                'updated_at' => $course->updated_at,
+            ];
+        })->filter();
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return response()->json([
+            'message' => "Successfully retrieved courses",
+            'courses' => $courses->values()
+        ]);
     }
 }
