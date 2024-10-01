@@ -10,6 +10,8 @@ class CourseController extends Controller
     public function getRecommendation()
     {
         $courses = Course::with(['instructor', 'category'])
+            ->where('is_validated', true)
+            ->inRandomOrder()
             ->limit(4)
             ->get()
             ->map(function ($course) {
@@ -17,7 +19,7 @@ class CourseController extends Controller
             });
 
         return response()->json([
-            'message' => "Successfully get recommended courses data",
+            'message' => "Successfully retrieved recommended courses data",
             'courses' => $courses
         ]);
     }
@@ -25,7 +27,7 @@ class CourseController extends Controller
     public function getCourse(Request $request)
     {
         $user = $request->user();
-        $query = Course::with(['instructor', 'category']);
+        $query = Course::with(['instructor', 'category'])->where('is_validated', true);
 
         if ($request->has('search')) {
             $search = $request->input('search');
@@ -33,23 +35,24 @@ class CourseController extends Controller
         }
 
         $courses = $query->get()->map(function ($course) use ($user) {
-            if ($user && $user->courses->contains($course->id)) {
+            if ($user && $user->courses()->where('course_id', $course->id)->exists()) {
                 return null;
             }
             return $this->formatCourseData($course);
-        })->filter();
+        })->filter()->values();
 
         return response()->json([
             'message' => "Successfully retrieved courses",
-            'courses' => $courses->values()
+            'courses' => $courses
         ]);
     }
 
     public function getCourseDetail($course_id)
     {
         $course = Course::with(['instructor', 'category', 'lessons', 'ratings.student'])
+            ->where('is_validated', true)
             ->findOrFail($course_id);
-    
+
         $formattedCourse = $this->formatCourseData($course);
         
         $formattedCourse['lessons'] = $course->lessons->map(function ($lesson) {
@@ -59,28 +62,42 @@ class CourseController extends Controller
                 'duration' => $lesson->duration,
             ];
         });
-    
+
         $formattedCourse['ratings'] = $course->ratings->map(function ($rating) {
             return [
                 'id' => $rating->id,
                 'rating' => $rating->rating,
                 'review' => $rating->review,
                 'student_name' => $rating->student->name,
-                'created_at' => $rating->createdAt,
+                'created_at' => $rating->created_at,
             ];
         });
-    
-        $formattedCourse['average_rating'] = $course->ratings->avg('rating');
-    
+
+        $formattedCourse['average_rating'] = $course->ratings->avg('rating') ?? 0;
+
         return response()->json([
-            'message' => "Successfully retrieved course details",
+            'message' => "Successfully retrieved validated course details",
             'course' => $formattedCourse
         ]);
     }
 
-    /**
-     * Helper function to format course data.
-     */
+    public function getAllValidatedCourses()
+    {
+        $courses = Course::with(['instructor', 'category', 'ratings'])
+            ->where('is_validated', true)
+            ->get()
+            ->map(function ($course) {
+                $formattedCourse = $this->formatCourseData($course);
+                $formattedCourse['average_rating'] = $course->ratings->avg('rating') ?? 0;
+                return $formattedCourse;
+            });
+
+        return response()->json([
+            'message' => "Successfully retrieved all validated courses",
+            'courses' => $courses
+        ]);
+    }
+
     private function formatCourseData($course)
     {
         return [
@@ -93,7 +110,7 @@ class CourseController extends Controller
             'category_name' => $course->category->name,
             'description' => $course->description,
             'brief' => $course->brief,
-            'image' => env('BASE_URL') . 'images/' . $course->image,
+            'image' => env('APP_URL') . '/images/' . $course->image,
             'created_at' => $course->created_at,
             'updated_at' => $course->updated_at,
         ];
