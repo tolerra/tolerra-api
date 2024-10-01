@@ -49,17 +49,18 @@ class CourseController extends Controller
 
     public function getCourseDetail($course_id)
     {
-        $course = Course::with(['instructor', 'category', 'lessons', 'ratings.student'])
-            ->where('isValidated', true)
-            ->findOrFail($course_id);
+        $course = Course::with(['instructor', 'category', 'chapters', 'ratings.student'])
+        ->where('isValidated', true)
+        ->findOrFail($course_id);
 
         $formattedCourse = $this->formatCourseData($course);
-        
-        $formattedCourse['lessons'] = $course->lessons->map(function ($lesson) {
+    
+        $formattedCourse['chapters'] = $course->chapters->map(function ($chapter) {
             return [
-                'id' => $lesson->id,
-                'title' => $lesson->title,
-                'duration' => $lesson->duration,
+                'id' => $chapter->id,
+                'name' => $chapter->name,
+                'file' => $chapter->file,
+                'isDone' => $chapter->isDone,
             ];
         });
 
