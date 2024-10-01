@@ -104,6 +104,7 @@ class CourseController extends Controller
             'id' => $course->id,
             'name' => $course->name,
             'slug' => $course->slug,
+            'isValidated' => $course->isValidated,
             'instructor_id' => $course->instructor_id,
             'instructor_name' => $course->instructor->name,
             'category_id' => $course->category_id,
