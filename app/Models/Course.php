@@ -27,6 +27,11 @@ class Course extends Model
         return $this->hasMany(Rating::class);
     }
 
+    public function chapters()
+    {
+        return $this->hasMany(Chapter::class);
+    }
+
     public function instructor()
     {
         return $this->belongsTo(User::class, 'instructor_id');
