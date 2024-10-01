@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RatingController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\AuthController;
 
 Route::get('/test', function(){
     return response()->json([
@@ -26,7 +27,7 @@ Route::get('/courses/ratings/top-reviews', [RatingController::class, 'getTopRevi
 
 
 //Auth
-Route::post('/register/{role}', [UserController::class, 'register']);
-Route::post('/login', [UserController::class, 'login']);
-Route::get('/{user_id}/profile', [UserController::class, 'getProfile']);
-Route::put('/{user_id}/profile', [UserController::class, 'updateProfile']);
+Route::post('/register/{role}', [AuthController::class, 'register']); // REGISTER USER & INSTRUCTOR
+Route::post('/login', [AuthController::class, 'login']); // LOGIN USER
+Route::get('/{user_id}/profile', [AuthController::class, 'getProfile']); // GET USER DATA
+Route::put('/{user_id}/profile', [AuthController::class, 'updateProfile']); // UPDATE USER DATA
