@@ -10,7 +10,7 @@ class CourseController extends Controller
     public function getRecommendation()
     {
         $courses = Course::with(['instructor', 'category'])
-            ->where('is_validated', true)
+            ->where('isValidated', true)
             ->inRandomOrder()
             ->limit(4)
             ->get()
@@ -27,7 +27,7 @@ class CourseController extends Controller
     public function getCourse(Request $request)
     {
         $user = $request->user();
-        $query = Course::with(['instructor', 'category'])->where('is_validated', true);
+        $query = Course::with(['instructor', 'category'])->where('isValidated', true);
 
         if ($request->has('search')) {
             $search = $request->input('search');
@@ -50,7 +50,7 @@ class CourseController extends Controller
     public function getCourseDetail($course_id)
     {
         $course = Course::with(['instructor', 'category', 'lessons', 'ratings.student'])
-            ->where('is_validated', true)
+            ->where('isValidated', true)
             ->findOrFail($course_id);
 
         $formattedCourse = $this->formatCourseData($course);
@@ -84,7 +84,7 @@ class CourseController extends Controller
     public function getAllValidatedCourses()
     {
         $courses = Course::with(['instructor', 'category', 'ratings'])
-            ->where('is_validated', true)
+            ->where('isValidated', true)
             ->get()
             ->map(function ($course) {
                 $formattedCourse = $this->formatCourseData($course);
