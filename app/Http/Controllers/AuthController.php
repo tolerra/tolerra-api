@@ -74,7 +74,7 @@ class AuthController extends Controller
     
             DisabilityVerification::create([
                 'user_id' => $user->id,
-                'card_path' => $uploadedFileUrl,
+                'file_path' => $uploadedFileUrl,
             ]);
     
             return response()->json([
