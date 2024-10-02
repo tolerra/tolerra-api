@@ -69,10 +69,21 @@ jobs:
     needs: build_and_test
     if: github.ref != 'refs/heads/main' && success()
   
+    permissions:
+      contents: write
+      pull-requests: write
+  
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2 
   
+    - name: Fetch main branch
+      run: git fetch origin main
+
+    - name: Merge main branch
+      run: git merge origin/main
+      continue-on-error: true
+
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v3
       with:
@@ -84,4 +95,3 @@ jobs:
           This is an auto-generated pull request from branch `${{ github.head_ref != '' && github.head_ref || github.ref_name }}`
           to merge changes into `main`.
         draft: false
-  
