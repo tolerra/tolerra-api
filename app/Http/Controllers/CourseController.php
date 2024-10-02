@@ -58,7 +58,7 @@ class CourseController extends Controller
         ->findOrFail($course_id);
 
         $formattedCourse = $this->formatCourseData($course);
-    
+
         $formattedCourse['chapters'] = $course->chapters->map(function ($chapter) {
             return [
                 'id' => $chapter->id,
@@ -173,7 +173,7 @@ class CourseController extends Controller
         $course = Course::create([
             'name' => $request->name,
             'slug' => Str::slug($request->name),
-            'instructor_id' => Auth::id(),  
+            'instructor_id' => Auth::id(),
             'desc' => $request->desc,
             'brief' => $request->brief,
             'image' => $imageName ?? null,
