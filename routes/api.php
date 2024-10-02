@@ -8,6 +8,7 @@ use App\Http\Controllers\ThreadController;
 use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\NotificationController;
 
 Route::get('/test', function(){
     return response()->json([
@@ -48,4 +49,8 @@ Route::middleware('auth:sanctum')->group(function () {
     //Enrollments
     Route::post('/student/courses/{course_id}/enroll', [EnrollmentController::class, 'enroll']);
     Route::get('/student/enrolled-course', [EnrollmentController::class, 'getEnrolledCourses']);
+
+    // Notifications
+    Route::get('/api/notifications/{user_id}', [NotificationController::class, 'getNotifications']);
+    Route::put('/api/notifications/{user_id}/{notification_id}', [NotificationController::class, 'updateNotification']);
 });
