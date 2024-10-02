@@ -37,6 +37,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user/{user_id}/profile', [UserController::class, 'getProfile']); // GET USER DATA
     Route::put('/user/{user_id}/profile', [UserController::class, 'updateProfile']); // UPDATE USER DATA
 
+    //Courses
+    Route::post('/instructor/courses', [CourseController::class, 'addCourse']);
+    Route::get('/courses/enrolled/{course_id}', [CourseController::class, 'getEnrolledDetailCourse']);
+
     //Threads
     Route::post('/threads', [ThreadController::class, 'createThread']); // CREATE NEW THREAD
     Route::post('/threads/{thread_id}/comment', [ThreadController::class, 'createComment']); // CREATE COMMENT ON THREAD
