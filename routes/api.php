@@ -56,6 +56,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/student/enrolled-course', [EnrollmentController::class, 'getEnrolledCourses']);
 
     // Notifications
-    Route::get('/api/notifications/{user_id}', [NotificationController::class, 'getNotifications']);
-    Route::put('/api/notifications/{user_id}/{notification_id}', [NotificationController::class, 'updateNotification']);
+    Route::get('/notifications/{user_id}', [NotificationController::class, 'getNotifications']);
+    Route::put('/notifications/{user_id}/{notification_id}', [NotificationController::class, 'updateNotification']);
 });
