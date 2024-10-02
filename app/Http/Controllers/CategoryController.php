@@ -10,7 +10,7 @@ class CategoryController extends Controller
     public function getCategories()
     {
         // Mengambil kategori secara distinct
-        $categories = Category::select('category')->distinct()->get();
+        $categories = Category::select('name')->distinct()->get();
 
         return response()->json($categories);
     }
