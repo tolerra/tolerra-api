@@ -32,6 +32,17 @@ class Course extends Model
         return $this->hasMany(Chapter::class);
     }
 
+    public function enrollments()
+    {
+        return $this->hasMany(Enrollment::class, 'course_id');
+    }
+
+    public function totalStudents()
+    {
+        // Menghitung jumlah student yang enroll di course ini
+        return $this->enrollments()->count();
+    }
+
     public function instructor()
     {
         return $this->belongsTo(User::class, 'instructor_id');

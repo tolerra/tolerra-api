@@ -42,6 +42,7 @@ Route::middleware('auth:sanctum')->group(function () {
     //Courses
     Route::post('/instructor/courses', [CourseController::class, 'addCourse']);
     Route::get('/courses/enrolled/{course_id}', [CourseController::class, 'getEnrolledDetailCourse']);
+    Route::get('/courses/instructor/{instructor_id}', [CourseController::class, 'getInstructorCourses']); // GET INSTRUCTOR COURSES
 
     //Chapter
     Route::post('/instructor/courses/{course_id}/chapter', [ChapterController::class, 'addChapter']); // ADD CHAPTER TO COURSE

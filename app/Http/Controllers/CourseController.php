@@ -7,6 +7,7 @@ use App\Models\Course;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Enrollment;
 
 class CourseController extends Controller
 {
@@ -38,7 +39,7 @@ class CourseController extends Controller
         }
 
         $courses = $query->get()->map(function ($course) use ($user) {
-            if ($user && $user->courses()->where('course_id', $course->id)->exists()) {
+            if ($user && $user->courses()->where('id', $course->id)->exists()) {
                 return null;
             }
             return $this->formatCourseData($course);
@@ -111,19 +112,28 @@ class CourseController extends Controller
         ]);
     }
 
-    public function getAllValidatedCourses()
+    public function getInstructorCourses(Request $request)
     {
-        $courses = Course::with(['instructor', 'category', 'ratings'])
-            ->where('isValidated', true)
+        // Pastikan user yang terautentikasi adalah seorang instructor
+        $user = Auth::user();
+        if (!$user || $user->role !== 'instructor') {
+            return response()->json([
+                'message' => 'Unauthorized. Only instructors can access this endpoint.'
+            ], 403);
+        }
+
+        $courses = Course::where('id', $user->id)
+            ->with(['category', 'ratings'])
             ->get()
             ->map(function ($course) {
                 $formattedCourse = $this->formatCourseData($course);
                 $formattedCourse['average_rating'] = $course->ratings->avg('rating') ?? 0;
+                $formattedCourse['total_students'] = Enrollment::where('course_id', $course->id)->count();
                 return $formattedCourse;
             });
 
         return response()->json([
-            'message' => "Successfully retrieved all validated courses",
+            'message' => "Successfully retrieved instructor's courses",
             'courses' => $courses
         ]);
     }
