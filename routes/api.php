@@ -6,6 +6,7 @@ use App\Http\Controllers\CourseController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ThreadController;
 use App\Http\Controllers\EnrollmentController;
+use App\Http\Controllers\CategoryController;
 
 Route::get('/test', function(){
     return response()->json([
@@ -17,6 +18,9 @@ Route::get('/test', function(){
 Route::get('/courses', [CourseController::class, 'getCourse']);
 Route::get('/courses/recommendation', [CourseController::class, 'getRecommendation']); // GET COURSES WITHIN TOP 4 RATINGS
 Route::get('/courses/{course_id}', [CourseController::class, 'getCourseDetail']); // GET COURSE DETAIL
+
+//categories
+Route::get('/categories', [CategoryController::class, 'getCategories']); // GET ALL CATEGORIES
 
 //rating
 Route::get('/courses/ratings/top-reviews', [RatingController::class, 'getTopReviews']); // GET TOP 3 REVIEWS
