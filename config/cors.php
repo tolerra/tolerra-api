@@ -19,11 +19,7 @@ return [
 
     'allowed_methods' => ['GET', 'POST', 'PUT'],
 
-    'allowed_origins' => [
-        'https://tolerra-rcswh73of-qwacts-projects.vercel.app',
-        'https://tolerra-app.vercel.app',
-        'http://localhost:3000',
-    ],
+    'allowed_origins' => ['*'],
 
     'allowed_origins_patterns' => [],
 
@@ -33,6 +29,6 @@ return [
 
     'max_age' => 0,
 
-    'supports_credentials' => false,
+    'supports_credentials' => true,
 
 ];
