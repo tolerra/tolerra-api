@@ -3,10 +3,14 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Course;
+use App\Models\Chapter;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class ChapterController extends Controller
 {
-    public function getCategories()
     public function addChapter(Request $request, $course_id)
     {
         // Validasi bahwa user adalah instructor dari course ini

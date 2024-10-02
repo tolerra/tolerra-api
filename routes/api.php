@@ -9,6 +9,7 @@ use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ChapterController;
 
 Route::get('/test', function(){
     return response()->json([
@@ -41,6 +42,9 @@ Route::middleware('auth:sanctum')->group(function () {
     //Courses
     Route::post('/instructor/courses', [CourseController::class, 'addCourse']);
     Route::get('/courses/enrolled/{course_id}', [CourseController::class, 'getEnrolledDetailCourse']);
+
+    //Chapter
+    Route::post('/instructor/courses/{course_id}/chapter', [ChapterController::class, 'addChapter']); // ADD CHAPTER TO COURSE
 
     //Threads
     Route::post('/threads', [ThreadController::class, 'createThread']); // CREATE NEW THREAD
