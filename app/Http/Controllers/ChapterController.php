@@ -55,4 +55,26 @@ class ChapterController extends Controller
             'chapter' => $chapter
         ], 201);
     }
+    public function getChapterDetail($course_id, $chapter_id)
+    {
+        // Cek apakah course ada
+        $course = Course::findOrFail($course_id);
+
+        // Ambil detail chapter berdasarkan ID
+        $chapter = Chapter::where('course_id', $course->id)->findOrFail($chapter_id);
+
+        // Format data chapter
+        $formattedChapter = [
+            'id' => $chapter->id,
+            'name' => $chapter->name,
+            'file' => $chapter->file ? env('APP_URL') . '/storage/course_contents/' . basename($chapter->file) : null, // Menyediakan URL file jika ada
+            'text' => $chapter->text,
+            'isDone' => $chapter->isDone,
+        ];
+
+        return response()->json([
+            'message' => 'Successfully retrieved chapter details',
+            'chapter' => $formattedChapter
+        ], 200);
+    }
 }
