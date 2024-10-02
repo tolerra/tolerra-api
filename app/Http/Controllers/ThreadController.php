@@ -17,6 +17,7 @@ class ThreadController extends Controller
         $validatedData = $request->validate([
             'category_id' => 'required|exists:categories,id',
             'user_id' => 'required|exists:users,id',
+            'title' => 'required|string',
             'content' => 'required|string',
         ]);
 

@@ -18,6 +18,7 @@ class ThreadSeeder extends Seeder
             Thread::create([
                 'category_id' => $categories->random()->id,
                 'user_id' => $user->id,
+                'title' => 'Sample Thread Title',
                 'content' => 'This is a thread content',
             ]);
         }
