@@ -5,6 +5,7 @@ use App\Http\Controllers\RatingController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ThreadController;
+use App\Http\Controllers\CategoryController;
 
 Route::get('/test', function(){
     return response()->json([
@@ -34,3 +35,6 @@ Route::get('/threads', [ThreadController::class, 'getThreads']); // GET ALL THRE
 Route::post('/threads', [ThreadController::class, 'createThread']); // CREATE NEW THREAD
 Route::get('/threads/{thread_id}', [ThreadController::class, 'getThreadDetail']); // GET THREAD DETAIL
 Route::post('/threads/{thread_id}/comment', [ThreadController::class, 'createComment']); // CREATE COMMENT ON THREAD
+
+//Categories
+Route::get('/categories', [CategoryController::class, 'getCategories']); // GET ALL CATEGORIES
