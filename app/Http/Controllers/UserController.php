@@ -14,14 +14,17 @@ class UserController extends Controller
     public function getProfile($user_id)
     {
         $user = User::findOrFail($user_id);
-
+    
         $responseData = ['user' => $user];
-
+    
         if ($user->role === 'student') {
-            $verificationExists = DisabilityVerification::where('user_id', $user_id)->exists();
-            $responseData['disability_verification'] = $verificationExists;
+            $verification = $user->disabilityVerification;
+            $responseData['isVerified'] = $verification;
+        } elseif ($user->role === 'instructor') {
+            $badges = $user->badges;
+            $responseData['badges'] = $badges;
         }
-
+    
         return response()->json($responseData, 200);
     }
 

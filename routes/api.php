@@ -10,6 +10,8 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ChapterController;
+use App\Http\Controllers\AdminController;
+
 
 Route::get('/test', function(){
     return response()->json([
@@ -58,4 +60,11 @@ Route::middleware('auth:sanctum')->group(function () {
     // Notifications
     Route::get('/notifications/{user_id}', [NotificationController::class, 'getNotifications']);
     Route::put('/notifications/{user_id}/{notification_id}', [NotificationController::class, 'updateNotification']);
+});
+
+//For Admin
+Route::middleware(['auth:sanctum', 'admin'])->group(function () {
+    Route::get('/admin/disability-verifications', [AdminController::class, 'viewDisabilityVerifications']);
+    Route::get('/admin/disability-verifications/{id}', [AdminController::class, 'viewDisabilityVerification']);
+    Route::put('/admin/disability-verifications/{id}', [AdminController::class, 'updateDisabilityVerification']);
 });

@@ -10,7 +10,9 @@ class DisabilityVerification extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id'
+        'user_id',
+        'file_path',
+        'is_verified'
     ];
 
     public function user()
