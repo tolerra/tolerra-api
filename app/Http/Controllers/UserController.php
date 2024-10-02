@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\DisabilityVerification; 
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -13,7 +14,15 @@ class UserController extends Controller
     public function getProfile($user_id)
     {
         $user = User::findOrFail($user_id);
-        return response()->json(['user' => $user], 200);
+
+        $responseData = ['user' => $user];
+
+        if ($user->role === 'student') {
+            $verificationExists = DisabilityVerification::where('user_id', $user_id)->exists();
+            $responseData['disability_verification'] = $verificationExists;
+        }
+
+        return response()->json($responseData, 200);
     }
 
     public function updateProfile(Request $request, $user_id)
