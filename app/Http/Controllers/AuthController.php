@@ -12,6 +12,13 @@ use Illuminate\Validation\Rule;
 
 class AuthController extends Controller
 {
+    protected $cloudinaryController;
+
+    public function __construct(CloudinaryController $cloudinaryController)
+    {
+        $this->cloudinaryController = $cloudinaryController;
+    }
+
     public function register(Request $request, $role)
     {
         $validator = Validator::make($request->all(), [
@@ -19,7 +26,7 @@ class AuthController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
             'role' => ['required', Rule::in(['student', 'instructor'])],
-        ]);  
+        ]);
 
         if ($validator->fails()) {
             return response()->json([
@@ -52,11 +59,11 @@ class AuthController extends Controller
                 ], 422);
             }
 
-            $path = $request->file('disability_card')->store('disability_cards', 'public');
+            $uploadedFileUrl = $this->cloudinaryController->upload($request, 'disability_card', 'disability_cards');
 
             DisabilityVerification::create([
                 'user_id' => $user->id,
-                'card_path' => $path,
+                'card_path' => $uploadedFileUrl,
             ]);
 
             return response()->json([

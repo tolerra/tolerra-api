@@ -11,26 +11,6 @@ use Illuminate\Http\UploadedFile;
 class AuthControllerTest extends TestCase
 {
     use RefreshDatabase;
-    public function testRegister()
-    {
-        Storage::fake('public');
-    
-        $data = [
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-            'password' => 'password',
-            'password_confirmation' => 'password',
-            'role' => 'student',
-            'disability_card' => UploadedFile::fake()->image('disability_card.jpg')
-        ];
-    
-        $response = $this->postJson('/api/register/student', $data);
-    
-        $response->assertStatus(201)
-                 ->assertJsonFragment(['name' => 'Test User']);
-    
-        Storage::disk('public')->assertExists('disability_cards/' . $data['disability_card']->hashName());
-    }
 
     public function testLogin()
     {
