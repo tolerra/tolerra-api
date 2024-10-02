@@ -7,6 +7,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ThreadController;
 use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\UserController;
 
 Route::get('/test', function(){
     return response()->json([
@@ -27,13 +28,14 @@ Route::get('/courses/ratings/top-reviews', [RatingController::class, 'getTopRevi
 
 Route::post('/register/{role}', [AuthController::class, 'register']); // REGISTER USER & INSTRUCTOR
 Route::post('/login', [AuthController::class, 'login']); // LOGIN USER
+
 Route::get('/threads', [ThreadController::class, 'getThreads']); // GET ALL THREADS
 Route::get('/threads/{thread_id}', [ThreadController::class, 'getThreadDetail']); // GET THREAD DETAIL
 
 //Need Token
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/{user_id}/profile', [AuthController::class, 'getProfile']); // GET USER DATA
-    Route::put('/{user_id}/profile', [AuthController::class, 'updateProfile']); // UPDATE USER DATA
+    Route::get('/user/{user_id}/profile', [UserController::class, 'getProfile']); // GET USER DATA
+    Route::put('/user/{user_id}/profile', [UserController::class, 'updateProfile']); // UPDATE USER DATA
 
     //Threads
     Route::post('/threads', [ThreadController::class, 'createThread']); // CREATE NEW THREAD
