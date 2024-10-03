@@ -54,6 +54,6 @@ class User extends Authenticatable
 
     public function disabilityVerifications()
     {
-        return $this->hasMany(DisabilityVerification::class);
+        return $this->hasOne(DisabilityVerification::class);
     }
 }

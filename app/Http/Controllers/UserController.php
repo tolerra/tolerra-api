@@ -19,10 +19,7 @@ class UserController extends Controller
     
         if ($user->role === 'student') {
             $verification = $user->disabilityVerification;
-            $responseData = $verification;
-        } elseif ($user->role === 'instructor') {
-            $badges = $user->badges;
-            $responseData['badges'] = $badges;
+            $responseData['isVerified'] = $verification ? $verification->is_verified : false;
         }
     
         return response()->json($responseData, 200);
