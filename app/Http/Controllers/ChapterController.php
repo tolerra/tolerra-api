@@ -56,25 +56,41 @@ class ChapterController extends Controller
         ], 201);
     }
     public function getChapterDetail($course_id, $chapter_id)
-    {
-        // Cek apakah course ada
-        $course = Course::findOrFail($course_id);
+{
+    // Cek apakah course ada
+    $course = Course::findOrFail($course_id);
 
-        // Ambil detail chapter berdasarkan ID
-        $chapter = Chapter::where('course_id', $course->id)->findOrFail($chapter_id);
+    // Ambil semua chapter yang terkait dengan course
+    $chapters = Chapter::where('course_id', $course->id)->get();
 
-        // Format data chapter
-        $formattedChapter = [
+    // Ambil detail chapter yang dipilih berdasarkan ID
+    $selectedChapter = Chapter::where('course_id', $course->id)->findOrFail($chapter_id);
+
+    // Format data chapter yang dipilih (clicked chapter)
+    $formattedSelectedChapter = [
+        'id' => $selectedChapter->id,
+        'name' => $selectedChapter->name,
+        'file' => $selectedChapter->file ? env('APP_URL') . '/storage/course_contents/' . basename($selectedChapter->file) : null, // Menyediakan URL file jika ada
+        'text' => $selectedChapter->text,
+        'isDone' => $selectedChapter->isDone,
+    ];
+
+    // Format semua chapters
+    $formattedChapters = $chapters->map(function ($chapter) {
+        return [
             'id' => $chapter->id,
             'name' => $chapter->name,
             'file' => $chapter->file ? env('APP_URL') . '/storage/course_contents/' . basename($chapter->file) : null, // Menyediakan URL file jika ada
             'text' => $chapter->text,
             'isDone' => $chapter->isDone,
         ];
+    });
 
-        return response()->json([
-            'message' => 'Successfully retrieved chapter details',
-            'chapter' => $formattedChapter
-        ], 200);
-    }
+    return response()->json([
+        'message' => 'Successfully retrieved chapter details and list',
+        'selected_chapter' => $formattedSelectedChapter,  // Detail dari chapter yang dipilih
+        'chapters' => $formattedChapters                  // List dari semua chapters
+    ], 200);
+}
+
 }

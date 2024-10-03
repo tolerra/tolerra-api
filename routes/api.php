@@ -50,6 +50,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //Chapter
     Route::post('/instructor/courses/{course_id}/chapter', [ChapterController::class, 'addChapter']); // ADD CHAPTER TO COURSE
+    Route::get('/courses/{course_id}/chapter/{chapter_id}', [ChapterController::class, 'getChapterDetail']); // GET CHAPTER DETAIL
 
     //Threads
     Route::post('/threads', [ThreadController::class, 'createThread']); // CREATE NEW THREAD
@@ -62,7 +63,6 @@ Route::middleware('auth:sanctum')->group(function () {
     // Notifications
     Route::get('/notifications/{user_id}', [NotificationController::class, 'getNotifications']);
     Route::put('/notifications/{user_id}/{notification_id}', [NotificationController::class, 'updateNotification']);
-
     //Rating
     Route::post('/courses/{course_id}/rate', [RatingController::class, 'addRating']);
 });

@@ -31,7 +31,12 @@ class CourseController extends Controller
     public function getCourse(Request $request)
     {
         $user = $request->user();
-        $query = Course::with(['instructor', 'category'])->where('isValidated', true);
+        if (!$user || $user->role !== 'admin') {
+            $query = Course::with(['instructor', 'category'])->where('isValidated', true);
+        } else{
+            $query = Course::with(['instructor', 'category'])->where('isValidated', false);
+        }
+        
 
         if ($request->has('search')) {
             $search = $request->input('search');
@@ -88,9 +93,17 @@ class CourseController extends Controller
 
     public function getCourseDetail($course_id)
     {
-        $course = Course::with(['instructor', 'category', 'chapters', 'ratings.student'])
-        ->where('isValidated', true)
-        ->findOrFail($course_id);
+        $user = Auth::user();
+        $userRole = $user ? $user->role : 'guest';
+        if ($userRole === 'admin') {
+            $course = Course::with(['instructor', 'category', 'chapters'])
+                ->where('isValidated', false)
+                ->findOrFail($course_id);
+        } else {
+            $course = Course::with(['instructor', 'category', 'chapters', 'ratings.student'])
+                ->where('isValidated', true)
+                ->findOrFail($course_id);
+        }
 
         $formattedCourse = $this->formatCourseData($course);
 
@@ -193,6 +206,7 @@ class CourseController extends Controller
             'id' => $course->id,
             'name' => $course->name,
             'slug' => $course->slug,
+            'desc' => $course->desc,
             'isValidated' => $course->isValidated,
             'instructor_id' => $course->instructor_id,
             'instructor_name' => $course->instructor->name,
