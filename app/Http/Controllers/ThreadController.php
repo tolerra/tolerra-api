@@ -8,7 +8,7 @@ class ThreadController extends Controller
 {
     public function getThreads()
     {
-        $threads = Thread::all();
+        $threads = Thread::with('user:id,name')->get();
         return response()->json($threads);
     }
 
@@ -26,8 +26,8 @@ class ThreadController extends Controller
     }
 
     public function getThreadDetail($thread_id)
-    {
-        $thread = Thread::with('comments')->findOrFail($thread_id);
+    {   
+        $thread = Thread::with(['user:id,name', 'comments.user:id,name'])->findOrFail($thread_id);
         return response()->json($thread);
     }
 
