@@ -7,7 +7,6 @@ use App\Models\Category;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
-
 class CourseSeeder extends Seeder
 {
     public function run()
@@ -24,6 +23,7 @@ class CourseSeeder extends Seeder
                 'brief' => 'This is a brief summary',
                 'category_id' => $categories->random()->id,
                 'isValidated' => rand(0, 1),
+                'isCompleted' => rand(0, 1), 
             ]);
         }
     }

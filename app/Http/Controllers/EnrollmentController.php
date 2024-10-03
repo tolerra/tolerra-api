@@ -14,6 +14,22 @@ class EnrollmentController extends Controller
         $user = Auth::user();
         $course = Course::findOrFail($course_id);
 
+        // Count the number of active enrollments where isCompleted is false
+        $activeEnrollments = Enrollment::where('student_id', $user->id)
+            ->whereHas('course', function ($query) {
+                $query->where('isCompleted', false);
+            })
+            ->count();
+
+        // If the user has more than 2 active enrollments, disallow enrollment
+        if ($activeEnrollments >= 2) {
+            return response()->json(['message' => 'Cannot enroll in more than 2 active courses'], 400);
+        }
+
+        if ($course->isCompleted) {
+            return response()->json(['message' => 'Cannot enroll in a completed course'], 400);
+        }
+
         $enrollment = new Enrollment();
         $enrollment->student_id = $user->id;
         $enrollment->course_id = $course->id;
@@ -21,7 +37,6 @@ class EnrollmentController extends Controller
 
         return response()->json(['message' => 'Enrolled successfully'], 200);
     }
-
     public function getEnrolledCourses()
     {
         $user = Auth::user();
