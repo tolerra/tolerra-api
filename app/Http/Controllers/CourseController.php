@@ -202,7 +202,7 @@ class CourseController extends Controller
     }
 
     public function updateCourse(Request $request, $id)
-{
+    {
     try {
         $user = Auth::user();
         if (!$user || $user->role !== 'instructor') {

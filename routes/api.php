@@ -78,13 +78,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/{enrollment_id}/chapters/{chapter_id}/progress', [ProgressController::class, 'checkChapterProgress']);
     Route::get('/{enrollment_id}/progress', [ProgressController::class, 'checkCourseProgress']);
 
-});
-
-
-
-
-//For Admin
-Route::middleware(['auth:sanctum', 'admin'])->group(function () {
+    //Admin
     Route::get('/admin/disability-verifications', [AdminController::class, 'viewDisabilityVerifications']);
     Route::get('/admin/disability-verifications/{id}', [AdminController::class, 'viewDisabilityVerification']);
     Route::put('/admin/disability-verifications/{id}', [AdminController::class, 'updateDisabilityVerification']);
@@ -92,4 +86,3 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::get('/admin/courses/{course_id', [CourseController::class, 'getCourseDetail']);
     Route::get('/admin/courses/{course_id}/chapters/{chapter_id}', [ChapterController::class, 'getChapterDetail']);
 });
-
