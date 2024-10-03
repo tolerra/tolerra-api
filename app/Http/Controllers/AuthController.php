@@ -94,23 +94,27 @@ class AuthController extends Controller
             'email' => 'required|email',
             'password' => 'required'
         ]);
-
+    
         if ($validator->fails()) {
             return response()->json([
                 'message' => 'Validation failed',
                 'errors' => $validator->errors()
             ], 422);
         }
-
+    
         if (!Auth::attempt($request->only('email', 'password'))) {
             return response()->json([
                 'message' => 'Invalid credentials'
             ], 401);
         }
-
+    
         $user = User::where('email', $request->email)->firstOrFail();
-        $token = $user->createToken('auth_token')->plainTextToken;
-
+    
+        // Check if the user has admin privileges
+        $abilities = $user->role === 'admin' ? ['*'] : ['user'];
+    
+        $token = $user->createToken('auth_token', $abilities)->plainTextToken;
+    
         return response()->json([
             'message' => 'Login successful',
             'token' => $token,
