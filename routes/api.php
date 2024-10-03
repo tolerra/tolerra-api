@@ -57,7 +57,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/courses/{course_id}/chapter/{chapter_id}', [ChapterController::class, 'getChapterDetail']); // GET CHAPTER DETAIL
     Route::put('/instructor/courses/{course_id}/chapter/{chapter_id}', [ChapterController::class, 'updateChapter']); // UPDATE CHAPTER
     Route::delete('/instructor/courses/{course_id}/chapter/{chapter_id}', [ChapterController::class, 'deleteChapter']); // DELETE CHAPTER
-    Route::get('/courses/{course_id}/chapters', [ChapterController::class, 'getChapterDetail']); // GET ALL CHAPTERS
 
     //Threads
     Route::post('/threads', [ThreadController::class, 'createThread']); // CREATE NEW THREAD
