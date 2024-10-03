@@ -15,6 +15,7 @@ class CommentSeeder extends Seeder
         foreach ($threads as $thread) {
             Comment::create([
                 'thread_id' => $thread->id,
+                'name' => 'Seeder User',
                 'content' => 'This is a comment on the thread',
             ]);
         }
