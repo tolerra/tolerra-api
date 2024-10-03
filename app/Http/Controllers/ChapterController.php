@@ -99,6 +99,7 @@ class ChapterController extends Controller
 
             // Data untuk update
             $data = [
+                'name' => $request->input('name', $chapter->name),
                 'slug' => Str::slug($request->input('name', $chapter->name)),
                 'text' => $request->input('text', $chapter->text),
             ];
