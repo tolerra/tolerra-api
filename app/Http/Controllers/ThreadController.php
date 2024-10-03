@@ -8,7 +8,19 @@ class ThreadController extends Controller
 {
     public function getThreads()
     {
-        $threads = Thread::with('user:id,name')->get();
+        $threads = Thread::with('user:id,name')->get()->map(function ($thread) {
+            return [
+                'id' => $thread->id,
+                'category_id' => $thread->category_id,
+                'name' => $thread->user->name,
+                'user_id' => $thread->user_id,
+                'title' => $thread->title,
+                'content' => $thread->content,
+                'created_at' => $thread->created_at,
+                'updated_at' => $thread->updated_at,
+            ];
+        });
+    
         return response()->json($threads);
     }
 
@@ -26,8 +38,8 @@ class ThreadController extends Controller
     }
 
     public function getThreadDetail($thread_id)
-    {   
-        $thread = Thread::with(['user:id,name', 'comments.user:id,name'])->findOrFail($thread_id);
+    {
+        $thread = Thread::with('comments')->findOrFail($thread_id);
         return response()->json($thread);
     }
 
