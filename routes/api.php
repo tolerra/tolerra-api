@@ -63,11 +63,11 @@ Route::middleware('auth:sanctum')->group(function () {
     // Notifications
     Route::get('/notifications/{user_id}', [NotificationController::class, 'getNotifications']);
     Route::put('/notifications/{user_id}/{notification_id}', [NotificationController::class, 'updateNotification']);
+});
 
 
     //Rating
     Route::post('/courses/{course_id}/rate', [RatingController::class, 'addRating']);
-});
 
 //For Admin
 Route::middleware(['auth:sanctum', 'admin'])->group(function () {
