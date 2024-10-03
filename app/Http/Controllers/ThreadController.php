@@ -39,8 +39,30 @@ class ThreadController extends Controller
 
     public function getThreadDetail($thread_id)
     {
-        $thread = Thread::with('comments')->findOrFail($thread_id);
-        return response()->json($thread);
+        $thread = Thread::with(['user:id,name', 'comments.user:id,name'])->findOrFail($thread_id);
+    
+        $transformedThread = [
+            'id' => $thread->id,
+            'category_id' => $thread->category_id,
+            'user_id' => $thread->user_id,
+            'name' => $thread->user->name,
+            'title' => $thread->title,
+            'content' => $thread->content,
+            'created_at' => $thread->created_at,
+            'updated_at' => $thread->updated_at,
+            'comments' => $thread->comments->map(function ($comment) {
+                return [
+                    'id' => $comment->id,
+                    'name' => $comment->user->name,
+                    'thread_id' => $comment->thread_id,
+                    'content' => $comment->content,
+                    'created_at' => $comment->created_at,
+                    'updated_at' => $comment->updated_at,
+                ];
+            }),
+        ];
+    
+        return response()->json($transformedThread);
     }
 
     public function createComment(Request $request, $thread_id)
