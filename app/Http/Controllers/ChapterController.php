@@ -120,16 +120,13 @@ public function deleteChapter($course_id, $chapter_id)
             'message' => 'Unauthorized. Only instructors can access this endpoint.'
         ], 403);
     }
-    // Validasi bahwa user adalah instructor dari course ini
     $course = Course::findOrFail($course_id);
     if ($course->instructor_id !== Auth::id()) {
         return response()->json(['message' => 'Unauthorized'], 403);
     }
 
-    // Find the chapter
     $chapter = Chapter::where('course_id', $course_id)->findOrFail($chapter_id);
 
-    // Delete the chapter
     $chapter->delete();
 
     return response()->json([
@@ -138,28 +135,33 @@ public function deleteChapter($course_id, $chapter_id)
 }
     
 
-    public function getChapterDetail($course_id, $chapter_id)
-    {
-        $course = Course::findOrFail($course_id);
+public function getChapterDetail($course_id, $chapter_id)
+{
+    $course = Course::findOrFail($course_id);
 
-        $chapter = Chapter::where('course_id', $course->id)->findOrFail($chapter_id);
+    $chapter = Chapter::where('course_id', $course_id)->where('id', $chapter_id)->firstOrFail();
 
-        $chapters = Chapter::where('course_id', $course->id)->get();
+    $chapters = Chapter::where('course_id', $course_id)->get();
 
-        $formattedChapters = $chapters->map(function ($chapter) {
-            return [
-                'id' => $chapter->id,
-                'name' => $chapter->name,
-                'file' => $chapter->file ? env('APP_URL') . '/storage/course_contents/' . basename($chapter->file) : null, // Menyediakan URL file jika ada
-                'text' => $chapter->text,
-            ];
-        });
+    $formattedChapters = $chapters->map(function ($chapter) {
+        return [
+            'id' => $chapter->id,
+            'name' => $chapter->name,
+            'file' => $chapter->file ? env('APP_URL') . '/storage/course_contents/' . basename($chapter->file) : null,
+            'text' => $chapter->text,
+        ];
+    });
 
-        return response()->json([
-            'message' => 'Successfully retrieved chapter details and list',
-            'chapter' => $chapter, 
-            'chapters' => $formattedChapters 
-        ], 200);
-    }
-
+    // Kembalikan data dalam format JSON
+    return response()->json([
+        'message' => 'Successfully retrieved chapter details and list',
+        'chapter' => [
+            'id' => $chapter->id,
+            'name' => $chapter->name,
+            'file' => $chapter->file ? env('APP_URL') . '/storage/course_contents/' . basename($chapter->file) : null,
+            'text' => $chapter->text,
+        ], // Chapter yang sedang dibuka
+        'chapters' => $formattedChapters // List semua chapter
+    ], 200);
+}
 }
