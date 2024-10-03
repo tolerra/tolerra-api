@@ -82,6 +82,6 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::put('/admin/disability-verifications/{id}', [AdminController::class, 'updateDisabilityVerification']);
     Route::get('/admin/courses', [CourseController::class, 'getCourse']);
     Route::get('/admin/courses/{course_id', [CourseController::class, 'getCourseDetail']);
-    Route::get('/admin/courses/{course_id}/chapters', [ChapterController::class, 'getChapterDetail']);
+    Route::get('/admin/courses/{course_id}/chapters/{chapter_id}', [ChapterController::class, 'getChapterDetail']);
 });
 
