@@ -11,23 +11,45 @@ class AdminController extends Controller
 {
     public function viewDisabilityVerifications()
     {
-        $verifications = DisabilityVerification::all();
-        $names = User::pluck('name')->all();
+        $verifications = DisabilityVerification::with('user')->get();
+    
+        $verificationsWithNames = $verifications->map(function ($verification) {
+            return [
+                'id' => $verification->id,
+                'user_id' => $verification->user_id,
+                'user_name' => $verification->user->name ?? null,
+                'file_path' => $verification->file_path,
+                'is_verified' => $verification->is_verified,
+                'created_at' => $verification->created_at, 
+                'updated_at' => $verification->updated_at,
+            ];
+        });
+    
         return response()->json([
-            'verifications' => $verifications,
-            'names' => $names
+            'verifications' => $verificationsWithNames
         ]);
     }
     
     public function viewDisabilityVerification($id)
     {
-        $verification = DisabilityVerification::findOrFail($id);
-        $name = User::where('id', $verification->user_id)->pluck('name')->first();
+        $verification = DisabilityVerification::with('user')->findOrFail($id);
+        
+
+        $verificationWithName = [
+            'id' => $verification->id,
+            'user_id' => $verification->user_id,
+            'user_name' => $verification->user->name ?? null,
+            'file_path' => $verification->file_path,
+            'is_verified' => $verification->is_verified,
+            'created_at' => $verification->created_at, 
+            'updated_at' => $verification->updated_at,
+        ];
+    
         return response()->json([
-            'verifications' => $verification,
-            'names' => $name
+            'verification' => $verificationWithName
         ]);
     }
+    
 
     public function updateDisabilityVerification(Request $request, $id)
     {
