@@ -40,7 +40,7 @@ class ThreadController extends Controller
     
     public function getThreadDetail($thread_id)
     {
-        $thread = Thread::with(['user:id,name', 'comments'])->findOrFail($thread_id);
+        $thread = Thread::with(['user:id,name', 'comments.user:id,name'])->findOrFail($thread_id);
     
         $transformedThread = [
             'id' => $thread->id,
@@ -52,10 +52,9 @@ class ThreadController extends Controller
             'created_at' => $thread->created_at,
             'updated_at' => $thread->updated_at,
             'comments' => $thread->comments->map(function ($comment) {
-                $user = User::find($comment->user_id);
                 return [
                     'id' => $comment->id,
-                    'name' => $user ? $user->name : null,
+                    'name' => $comment->user->name,
                     'thread_id' => $comment->thread_id,
                     'content' => $comment->content,
                     'created_at' => $comment->created_at,
@@ -66,16 +65,30 @@ class ThreadController extends Controller
     
         return response()->json($transformedThread);
     }
-
+    
     public function createComment(Request $request, $thread_id)
     {
         $validatedData = $request->validate([
             'user_id' => 'required|exists:users,id',
             'content' => 'required|string',
         ]);
-
+    
         $thread = Thread::findOrFail($thread_id);
         $comment = $thread->comments()->create($validatedData);
-        return response()->json($comment, 201);
+    
+        // Fetch the user details
+        $user = User::find($validatedData['user_id']);
+    
+        // Include the user's name in the response
+        $commentWithUserName = [
+            'id' => $comment->id,
+            'name' => $user->name,
+            'thread_id' => $comment->thread_id,
+            'content' => $comment->content,
+            'created_at' => $comment->created_at,
+            'updated_at' => $comment->updated_at,
+        ];
+    
+        return response()->json($commentWithUserName, 201);
     }
 }
