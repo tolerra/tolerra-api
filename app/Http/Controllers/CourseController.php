@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Enrollment;
+use Illuminate\Support\Facades\Log;
 
 class CourseController extends Controller
 {
@@ -202,51 +203,60 @@ class CourseController extends Controller
 
     public function updateCourse(Request $request, $id)
 {
-    $user = Auth::user();
-    if (!$user || $user->role !== 'instructor') {
+    try {
+        $user = Auth::user();
+        if (!$user || $user->role !== 'instructor') {
+            return response()->json([
+                'message' => 'Unauthorized. Only instructors can access this endpoint.'
+            ], 403);
+        }
+
+        // Input validation
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'desc' => 'required|string',
+            'brief' => 'required|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'category_id' => 'required|exists:categories,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        // Find the course
+        $course = Course::findOrFail($id);
+
+        // Handle file upload
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $imageName = time() . '.' . $image->getClientOriginalExtension();
+            $image->storeAs('public/course_images', $imageName);
+            $course->image = $imageName;
+        }
+
+        $course->name = $request->name;
+        $course->slug = Str::slug($request->name);
+        $course->desc = $request->desc;
+        $course->brief = $request->brief;
+        $course->category_id = $request->category_id;
+        $course->save();
+
         return response()->json([
-            'message' => 'Unauthorized. Only instructors can access this endpoint.'
-        ], 403);
-    }
-
-    // Validasi input
-    $validator = Validator::make($request->all(), [
-        'name' => 'required|string|max:255',
-        'desc' => 'required|string',
-        'brief' => 'required|string',
-        'image' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
-        'category_id' => 'required|exists:categories,id',
-    ]);
-
-    if ($validator->fails()) {
+            'message' => 'Course updated successfully',
+            'course' => $course
+        ], 200);
+    } catch (\Exception $e) {
+        Log::error('Error updating course: ' . $e->getMessage());
         return response()->json([
-            'message' => 'Validation failed',
-            'errors' => $validator->errors()
-        ], 422);
+            'message' => 'An error occurred while updating the course. Please try again later.'
+        ], 500);
     }
-
-    $course = Course::findOrFail($id);
-
-    // Handle file upload
-    if ($request->hasFile('image')) {
-        $image = $request->file('image');
-        $imageName = time() . '.' . $image->getClientOriginalExtension();
-        $image->storeAs('public/course_images', $imageName);
-        $course->image = $imageName;
-    }
-
-    $course->name = $request->name;
-    $course->slug = Str::slug($request->name);
-    $course->desc = $request->desc;
-    $course->brief = $request->brief;
-    $course->category_id = $request->category_id;
-    $course->save();
-
-    return response()->json([
-        'message' => 'Course updated successfully',
-        'course' => $course
-    ]);
 }
+
 
 public function deleteCourse($id)
 {

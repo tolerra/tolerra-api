@@ -8,6 +8,7 @@ use App\Models\Chapter;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class ChapterController extends Controller
 {
@@ -61,56 +62,67 @@ class ChapterController extends Controller
         ], 201);
     }
 
-public function updateChapter(Request $request, $course_id, $chapter_id)
-{
-    $user = Auth::user();
-    if (!$user || $user->role !== 'instructor') {
-        return response()->json([
-            'message' => 'Unauthorized. Only instructors can access this endpoint.'
-        ], 403);
+    public function updateChapter(Request $request, $course_id, $chapter_id)
+    {
+        try {
+            $user = Auth::user();
+            if (!$user || $user->role !== 'instructor') {
+                return response()->json([
+                    'message' => 'Unauthorized. Only instructors can access this endpoint.'
+                ], 403);
+            }
+    
+            // Validate that user is instructor of the course
+            $course = Course::findOrFail($course_id);
+            if ($course->instructor_id !== $user->id) {
+                return response()->json(['message' => 'Unauthorized'], 403);
+            }
+    
+            // Input validation
+            $validator = Validator::make($request->all(), [
+                'name' => 'required|string|max:255',
+                'file' => 'nullable|file|mimes:pdf,doc,docx,ppt,pptx,mp4,mov,avi|max:102400', // 100MB max
+                'text' => 'required|string',
+            ]);
+    
+            if ($validator->fails()) {
+                return response()->json([
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+    
+            // Find the chapter
+            $chapter = Chapter::where('course_id', $course_id)->findOrFail($chapter_id);
+    
+            // Handle file upload
+            if ($request->hasFile('file')) {
+                $file = $request->file('file');
+                $fileName = time() . '_' . $file->getClientOriginalName();
+                $filePath = $file->storeAs('public/course_contents', $fileName);
+                $chapter->file = $filePath;
+            }
+    
+            // Update chapter details
+            $chapter->name = $request->name;
+            $chapter->slug = Str::slug($request->name);
+            $chapter->text = $request->text;
+            $chapter->save();
+    
+            return response()->json([
+                'message' => 'Chapter updated successfully',
+                'chapter' => $chapter
+            ], 200);
+        } catch (\Exception $e) {
+            // ...
+
+            Log::error('Error updating chapter: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'An error occurred while updating the chapter. Please try again later.'
+            ], 500);
+        }
     }
-    // Validasi bahwa user adalah instructor dari course ini
-    $course = Course::findOrFail($course_id);
-    if ($course->instructor_id !== Auth::id()) {
-        return response()->json(['message' => 'Unauthorized'], 403);
-    }
-
-    // Validasi input
-    $validator = Validator::make($request->all(), [
-        'name' => 'required|string|max:255',
-        'file' => 'file|mimes:pdf,doc,docx,ppt,pptx,mp4,mov,avi|max:102400', // 100MB max
-        'text' => 'required|string',
-    ]);
-
-    if ($validator->fails()) {
-        return response()->json([
-            'message' => 'Validation failed',
-            'errors' => $validator->errors()
-        ], 422);
-    }
-
-    // Find the chapter
-    $chapter = Chapter::where('course_id', $course_id)->findOrFail($chapter_id);
-
-    // Handle file upload
-    if ($request->hasFile('file')) {
-        $file = $request->file('file');
-        $fileName = time() . '_' . $file->getClientOriginalName();
-        $filePath = $file->storeAs('public/course_contents', $fileName);
-        $chapter->file = $filePath;
-    }
-
-    // Update chapter details
-    $chapter->name = $request->name;
-    $chapter->slug = Str::slug($request->name);
-    $chapter->text = $request->text;
-    $chapter->save();
-
-    return response()->json([
-        'message' => 'Chapter updated successfully',
-        'chapter' => $chapter
-    ], 200);
-}
+    
 
 public function deleteChapter($course_id, $chapter_id)
 {
