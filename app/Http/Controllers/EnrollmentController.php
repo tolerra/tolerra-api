@@ -46,7 +46,7 @@ class EnrollmentController extends Controller
             $course = $enrollment->course;
             $averageRating = $course->ratings->avg('rating') ?? 0;
             return [
-                'enrollment' => $enrollment,
+                'course' => $course,
                 'average_rating' => $averageRating,
             ];
         });
