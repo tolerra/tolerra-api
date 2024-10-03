@@ -27,7 +27,7 @@ class ProgressController extends Controller
         ], 201);
     }
 
-    public function checkChapterProgress($enrollment_id, $course_id, $chapter_id, Request $request)
+    public function checkChapterProgress($enrollment_id, $chapter_id)
     {
         $progress = Progress::where('chapter_id', $chapter_id)
                             ->where('enrollment_id', $enrollment_id)
@@ -38,7 +38,7 @@ class ProgressController extends Controller
         ]);
     }
 
-    public function checkCourseProgress($enrollment_id, $course_id)
+    public function checkCourseProgress($enrollment_id)
     {
         $enrollment = Enrollment::findOrFail($enrollment_id);
         $course = $enrollment->course;
