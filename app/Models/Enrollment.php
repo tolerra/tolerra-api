@@ -11,7 +11,8 @@ class Enrollment extends Model
 
     protected $fillable = [
         'student_id', 
-        'course_id'
+        'course_id',
+        'isCompleted' 
     ];
 
     public function student()
@@ -29,4 +30,3 @@ class Enrollment extends Model
         return $this->hasMany(Progress::class);
     }
 }
-

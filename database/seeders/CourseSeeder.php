@@ -23,7 +23,6 @@ class CourseSeeder extends Seeder
                 'brief' => 'This is a brief summary',
                 'category_id' => $categories->random()->id,
                 'isValidated' => rand(0, 1),
-                'isCompleted' => rand(0, 1), 
             ]);
         }
     }
