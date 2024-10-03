@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
+use App\Http\Controllers\CloudinaryController;
 
 class AuthController extends Controller
 {
@@ -27,51 +29,60 @@ class AuthController extends Controller
             'password' => 'required|string|min:8|confirmed',
             'role' => ['required', Rule::in(['student', 'instructor'])],
         ]);
-
+    
         if ($validator->fails()) {
             return response()->json([
                 'message' => 'Validation failed',
                 'errors' => $validator->errors()
             ], 422);
         }
-
+    
         if ($role !== $request->role) {
             return response()->json(['message' => 'Invalid role'], 400);
         }
-
+    
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'role' => $role,
         ]);
-
+    
         if ($role === 'student') {
             $validator = Validator::make($request->all(), [
-                'disability_card' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+                'disability_card' => 'required|string', 
             ]);
-
+    
             if ($validator->fails()) {
-                $user->delete(); // rollback user creation
+                $user->delete(); 
                 return response()->json([
                     'message' => 'Validation failed',
                     'errors' => $validator->errors()
                 ], 422);
             }
-
-            $uploadedFileUrl = $this->cloudinaryController->upload($request, 'disability_card', 'disability_cards');
-
+    
+            $base64File = $request->disability_card;
+            $fileData = base64_decode($base64File);
+            $tempFilePath = sys_get_temp_dir() . '/' . uniqid() . '.jpg';
+            file_put_contents($tempFilePath, $fileData);
+    
+            $tempFile = new UploadedFile($tempFilePath, 'disability_card.jpg', 'image/jpeg', null, true);
+    
+            $uploadedFileUrl = $this->cloudinaryController->upload($tempFile, 'disability_cards');
+    
+            unlink($tempFilePath);
+    
             DisabilityVerification::create([
                 'user_id' => $user->id,
-                'card_path' => $uploadedFileUrl,
+                'file_path' => $uploadedFileUrl,
             ]);
-
+    
             return response()->json([
                 'message' => 'Registration successful. Please wait for admin verification.',
                 'user' => $user
             ], 201);
         }
-
+    
         return response()->json([
             'message' => 'Registration successful',
             'user' => $user
