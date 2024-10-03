@@ -8,10 +8,11 @@ use App\Models\Enrollment;
 
 class ProgressController extends Controller
 {
-    public function markChapterAsDone($enrollment_id, $course_id, $chapter_id, Request $request)
+    public function createProgress($enrollment_id, $chapter_id, Request $request)
     {
         $request->validate([
             'enrollment_id' => 'required|exists:enrollments,id',
+            'chapter_id' => 'required|exists:chapters,id',
         ]);
 
         $progress = Progress::create([
@@ -21,7 +22,7 @@ class ProgressController extends Controller
         ]);
 
         return response()->json([
-            'message' => 'Chapter marked as done successfully',
+            'message' => 'Progress created successfully',
             'progress' => $progress
         ], 201);
     }
