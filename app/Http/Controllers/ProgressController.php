@@ -17,7 +17,7 @@ class ProgressController extends Controller
         $progress = Progress::create([
             'chapter_id' => $chapter_id,
             'enrollment_id' => $enrollment_id,
-            'isFinish' => true, // Set default progress to true
+            'isFinish' => true, 
         ]);
 
         return response()->json([
