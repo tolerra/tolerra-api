@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\DisabilityVerification;
+use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 
 class AdminController extends Controller
@@ -11,13 +12,21 @@ class AdminController extends Controller
     public function viewDisabilityVerifications()
     {
         $verifications = DisabilityVerification::all();
-        return response()->json($verifications);
+        $names = User::pluck('name')->all();
+        return response()->json([
+            'verifications' => $verifications,
+            'names' => $names
+        ]);
     }
     
     public function viewDisabilityVerification($id)
     {
         $verification = DisabilityVerification::findOrFail($id);
-        return response()->json($verification);
+        $name = User::where('id', $verification->user_id)->pluck('name')->first();
+        return response()->json([
+            'verifications' => $verification,
+            'names' => $name
+        ]);
     }
 
     public function updateDisabilityVerification(Request $request, $id)
