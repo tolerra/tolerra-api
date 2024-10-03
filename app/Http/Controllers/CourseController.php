@@ -31,9 +31,9 @@ class CourseController extends Controller
     public function getCourse(Request $request)
     {
         $user = $request->user();
-        if ($user->role === 'admin') {
+        if ($user->role == 'admin') {
             $query = Course::with(['instructor', 'category'])->where('isValidated', false);
-        } elseif ($user->role === 'instructor') {
+        } elseif ($user->role == 'instructor') {
             $query = Course::with(['instructor', 'category'])
                         ->where('instructor_id', $user->id);
         } else {
