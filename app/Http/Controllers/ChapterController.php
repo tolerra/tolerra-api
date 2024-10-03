@@ -104,9 +104,8 @@ class ChapterController extends Controller
             }
     
             // Update chapter details
-            $chapter->name = $request->name;
+            $chapter->fill($request->only(['name', 'text']));
             $chapter->slug = Str::slug($request->name);
-            $chapter->text = $request->text;
             $chapter->save();
     
             return response()->json([
@@ -114,8 +113,6 @@ class ChapterController extends Controller
                 'chapter' => $chapter
             ], 200);
         } catch (\Exception $e) {
-            // ...
-
             Log::error('Error updating chapter: ' . $e->getMessage());
             return response()->json([
                 'message' => 'An error occurred while updating the chapter. Please try again later.'
