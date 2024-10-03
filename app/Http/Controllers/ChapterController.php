@@ -72,20 +72,20 @@ class ChapterController extends Controller
                     'message' => 'Unauthorized. Only instructors can access this endpoint.'
                 ], 403);
             }
-    
+
             // Validasi bahwa pengguna adalah instruktur dari kursus
             $course = Course::findOrFail($course_id);
             if ($course->instructor_id !== $user->id) {
                 return response()->json(['message' => 'Unauthorized'], 403);
             }
-    
+
             // Validasi input
             $validator = Validator::make($request->all(), [
                 'name' => 'nullable|string|max:255',
                 'file' => 'nullable|file|mimes:pdf,doc,docx,ppt,pptx,mp4,mov,avi|max:102400', // 100MB max
                 'text' => 'nullable|string',
             ]);
-    
+
             // Cek jika validasi gagal
             if ($validator->fails()) {
                 return response()->json([
@@ -93,16 +93,16 @@ class ChapterController extends Controller
                     'errors' => $validator->errors()
                 ], 422);
             }
-    
+
             // Temukan chapter berdasarkan course_id dan chapter_id
             $chapter = Chapter::where('course_id', $course_id)->findOrFail($chapter_id);
-    
+
             // Data untuk update
             $data = [
                 'slug' => Str::slug($request->input('name', $chapter->name)),
                 'text' => $request->input('text', $chapter->text),
             ];
-    
+
             // Tangani upload file jika ada
             if ($request->hasFile('file')) {
                 $file = $request->file('file');
@@ -111,10 +111,13 @@ class ChapterController extends Controller
                 $file->move($destinationPath, $fileName);
                 $data['file'] = $fileName; // Simpan path file yang baru
             }
-    
+
             // Update chapter
             $chapter->update($data);
-    
+
+            // Update status isVerified pada Course menjadi false
+            $course->update(['isVerified' => false]);
+
             return response()->json([
                 'message' => "Chapter updated successfully",
                 'chapter' => $chapter
