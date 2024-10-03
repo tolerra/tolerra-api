@@ -11,6 +11,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ChapterController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\ProgressController;
 
 
 Route::get('/test', function(){
@@ -69,11 +70,19 @@ Route::middleware('auth:sanctum')->group(function () {
     // Notifications
     Route::get('/notifications/{user_id}', [NotificationController::class, 'getNotifications']);
     Route::put('/notifications/{user_id}/{notification_id}', [NotificationController::class, 'updateNotification']);
-});
-
 
     //Rating
     Route::post('/courses/{course_id}/rate', [RatingController::class, 'addRating']);
+
+    //Progress
+    Route::post('/courses/{course_id}/chapter/{chapter_id}/done', [ProgressController::class, 'addProgress']);
+    Route::get('/courses/{course_id}/chapter/{chapter_id}/progress', [ProgressController::class, 'getProgress']);
+    Route::get('/courses/{course_id}/progress', [ProgressController::class, 'getEnrollmentProgress']); 
+
+});
+
+
+
 
 //For Admin
 Route::middleware(['auth:sanctum', 'admin'])->group(function () {
