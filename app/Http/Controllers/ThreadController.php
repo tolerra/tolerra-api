@@ -37,19 +37,20 @@ class ThreadController extends Controller
         $thread = Thread::create($validatedData);
         return response()->json($thread, 201);
     }
-    
+
     public function getThreadDetail($thread_id)
-    {   
-        $thread = Thread::with(['user:id,name', 'comments.user:id,name'])->findOrFail($thread_id);
+    {
+        $thread = Thread::with('comments')->findOrFail($thread_id);
         return response()->json($thread);
     }
-    
+
     public function createComment(Request $request, $thread_id)
     {
         $validatedData = $request->validate([
             'user_id' => 'required|exists:users,id',
             'content' => 'required|string',
         ]);
+
         $thread = Thread::findOrFail($thread_id);
         $comment = $thread->comments()->create($validatedData);
         return response()->json($comment, 201);
