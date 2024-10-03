@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Thread;
+use App\Models\User;
 
 class ThreadController extends Controller
 {
@@ -36,10 +37,10 @@ class ThreadController extends Controller
         $thread = Thread::create($validatedData);
         return response()->json($thread, 201);
     }
-
+    
     public function getThreadDetail($thread_id)
     {
-        $thread = Thread::with(['user:id,name', 'comments.user:id,name'])->findOrFail($thread_id);
+        $thread = Thread::with(['user:id,name', 'comments'])->findOrFail($thread_id);
     
         $transformedThread = [
             'id' => $thread->id,
@@ -51,9 +52,10 @@ class ThreadController extends Controller
             'created_at' => $thread->created_at,
             'updated_at' => $thread->updated_at,
             'comments' => $thread->comments->map(function ($comment) {
+                $user = User::find($comment->user_id);
                 return [
                     'id' => $comment->id,
-                    'name' => $comment->user->name,
+                    'name' => $user ? $user->name : null,
                     'thread_id' => $comment->thread_id,
                     'content' => $comment->content,
                     'created_at' => $comment->created_at,
