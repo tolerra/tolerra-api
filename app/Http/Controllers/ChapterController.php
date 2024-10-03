@@ -63,69 +63,70 @@ class ChapterController extends Controller
     }
 
     public function updateChapter(Request $request, $course_id, $chapter_id)
-{
-    try {
-        $user = Auth::user();
-        
-        // Cek apakah pengguna terautentikasi dan memiliki peran sebagai instruktur
-        if (!$user || $user->role !== 'instructor') {
+    {
+        try {
+            // Cek pengguna yang terautentikasi
+            $user = Auth::user();
+            if (!$user || $user->role !== 'instructor') {
+                return response()->json([
+                    'message' => 'Unauthorized. Only instructors can access this endpoint.'
+                ], 403);
+            }
+    
+            // Validasi bahwa pengguna adalah instruktur dari kursus
+            $course = Course::findOrFail($course_id);
+            if ($course->instructor_id !== $user->id) {
+                return response()->json(['message' => 'Unauthorized'], 403);
+            }
+    
+            // Validasi input
+            $validator = Validator::make($request->all(), [
+                'name' => 'nullable|string|max:255',
+                'file' => 'nullable|file|mimes:pdf,doc,docx,ppt,pptx,mp4,mov,avi|max:102400', // 100MB max
+                'text' => 'nullable|string',
+            ]);
+    
+            // Cek jika validasi gagal
+            if ($validator->fails()) {
+                return response()->json([
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+    
+            // Temukan chapter berdasarkan course_id dan chapter_id
+            $chapter = Chapter::where('course_id', $course_id)->findOrFail($chapter_id);
+    
+            // Data untuk update
+            $data = [
+                'slug' => Str::slug($request->input('name', $chapter->name)),
+                'text' => $request->input('text', $chapter->text),
+            ];
+    
+            // Tangani upload file jika ada
+            if ($request->hasFile('file')) {
+                $file = $request->file('file');
+                $fileName = time() . '_' . $file->getClientOriginalName();
+                $destinationPath = public_path('course_contents/' . $course_id);
+                $file->move($destinationPath, $fileName);
+                $data['file'] = $fileName; // Simpan path file yang baru
+            }
+    
+            // Update chapter
+            $chapter->update($data);
+    
             return response()->json([
-                'message' => 'Unauthorized. Only instructors can access this endpoint.'
-            ], 403);
-        }
-
-        // Validasi bahwa pengguna adalah instruktur dari kursus
-        $course = Course::findOrFail($course_id);
-        if ($course->instructor_id !== $user->id) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
-
-        // Validasi input
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'file' => 'nullable|file|mimes:pdf,doc,docx,ppt,pptx,mp4,mov,avi|max:102400', // 100MB max
-            'text' => 'required|string',
-        ]);
-
-        if ($validator->fails()) {
+                'message' => "Chapter updated successfully",
+                'chapter' => $chapter
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Error updating chapter: ' . $e->getMessage());
             return response()->json([
-                'message' => 'Validation failed',
-                'errors' => $validator->errors()
-            ], 422);
+                'message' => 'An error occurred while updating the chapter. Please try again later.'
+            ], 500);
         }
-
-        // Temukan chapter
-        $chapter = Chapter::where('course_id', $course_id)->findOrFail($chapter_id);
-
-        // Tangani upload file
-        if ($request->hasFile('file')) {
-            $file = $request->file('file');
-            $fileName = time() . '_' . $file->getClientOriginalName();
-            $filePath = $file->storeAs('public/course_contents', $fileName);
-            $chapter->file = $filePath;
-        }
-
-        // Update detail chapter
-        $chapter->fill($request->only(['name', 'text']));
-        $chapter->slug = Str::slug($request->name);
-        $chapter->text = $request->text; // Ini redundan karena sudah diisi oleh fill
-        $chapter->save();
-
-        return response()->json([
-            'message' => 'Chapter updated successfully',
-            'chapter' => $chapter
-        ], 200);
-    } catch (\Exception $e) {
-        // Log error dengan informasi lebih detail
-        Log::error('Error updating chapter: ' . $e->getMessage());
-        
-        // Kembalikan respons error yang sesuai
-        return response()->json([
-            'message' => 'An error occurred while updating the chapter. Please try again later.'
-        ], 500);
     }
-}
- 
+     
 public function deleteChapter($course_id, $chapter_id)
 {
     $user = Auth::user();
