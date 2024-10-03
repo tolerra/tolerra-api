@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Cloudinary\Cloudinary;
 
 class CloudinaryController extends Controller
@@ -20,9 +20,8 @@ class CloudinaryController extends Controller
         ]);
     }
 
-    public function upload(Request $request, $fileKey, $folder)
+    public function upload(UploadedFile $file, string $folder)
     {
-        $file = $request->file($fileKey);
         $uploadedFileUrl = $this->cloudinary->uploadApi()->upload($file->getRealPath(), [
             'folder' => $folder
         ])['secure_url'];
