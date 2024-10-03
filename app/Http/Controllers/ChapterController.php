@@ -99,7 +99,6 @@ class ChapterController extends Controller
 
             // Data untuk update
             $data = [
-                'name' => $request->input('name', $chapter->name),
                 'slug' => Str::slug($request->input('name', $chapter->name)),
                 'text' => $request->input('text', $chapter->text),
             ];
@@ -130,7 +129,7 @@ class ChapterController extends Controller
             ], 500);
         }
     }
-     
+    
 public function deleteChapter($course_id, $chapter_id)
 {
     $user = Auth::user();
