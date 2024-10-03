@@ -176,7 +176,7 @@ class CourseController extends Controller
             'name' => 'required|string|max:255',
             'desc' => 'required|string',
             'brief' => 'required|string',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'required|string',
             'category_id' => 'required|exists:categories,id',
         ]);
 
@@ -235,7 +235,7 @@ class CourseController extends Controller
             'name' => 'nullable|string|max:255',
             'desc' => 'nullable|string',
             'brief' => 'nullable|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'nullable|string',
             'category_id' => 'nullable|exists:categories,id',
         ]);
 
