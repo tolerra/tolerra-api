@@ -8,7 +8,7 @@ use App\Models\Enrollment;
 
 class ProgressController extends Controller
 {
-    public function markChapterAsDone($course_id, $chapter_id, Request $request)
+    public function markChapterAsDone($enrollment_id, $course_id, $chapter_id, Request $request)
     {
         $request->validate([
             'enrollment_id' => 'required|exists:enrollments,id',
@@ -16,7 +16,7 @@ class ProgressController extends Controller
 
         $progress = Progress::create([
             'chapter_id' => $chapter_id,
-            'enrollment_id' => $request->enrollment_id,
+            'enrollment_id' => $enrollment_id,
             'isFinish' => true, // Set default progress to true
         ]);
 
@@ -26,14 +26,10 @@ class ProgressController extends Controller
         ], 201);
     }
 
-    public function checkChapterProgress($course_id, $chapter_id, Request $request)
+    public function checkChapterProgress($enrollment_id, $course_id, $chapter_id, Request $request)
     {
-        $request->validate([
-            'enrollment_id' => 'required|exists:enrollments,id',
-        ]);
-
         $progress = Progress::where('chapter_id', $chapter_id)
-                            ->where('enrollment_id', $request->enrollment_id)
+                            ->where('enrollment_id', $enrollment_id)
                             ->first();
 
         return response()->json([
@@ -41,7 +37,7 @@ class ProgressController extends Controller
         ]);
     }
 
-    public function checkCourseProgress($course_id, $enrollment_id)
+    public function checkCourseProgress($enrollment_id, $course_id)
     {
         $enrollment = Enrollment::findOrFail($enrollment_id);
         $course = $enrollment->course;
