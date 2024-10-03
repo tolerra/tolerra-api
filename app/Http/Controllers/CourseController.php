@@ -31,12 +31,14 @@ class CourseController extends Controller
     public function getCourse(Request $request)
     {
         $user = $request->user();
-        if (!$user || $user->role !== 'admin') {
-            $query = Course::with(['instructor', 'category'])->where('isValidated', true);
-        } else{
+        if ($user->role === 'admin') {
             $query = Course::with(['instructor', 'category'])->where('isValidated', false);
+        } elseif ($user->role === 'instructor') {
+            $query = Course::with(['instructor', 'category'])
+                        ->where('instructor_id', $user->id);
+        } else {
+            $query = Course::with(['instructor', 'category'])->where('isValidated', true);
         }
-        
 
         if ($request->has('search')) {
             $search = $request->input('search');
