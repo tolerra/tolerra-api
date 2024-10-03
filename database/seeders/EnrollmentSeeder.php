@@ -18,6 +18,7 @@ class EnrollmentSeeder extends Seeder
             Enrollment::create([
                 'student_id' => $student->id,
                 'course_id' => $courses->random()->id,
+                'isCompleted' => false 
             ]);
         }
     }
