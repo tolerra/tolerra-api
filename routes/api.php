@@ -29,6 +29,8 @@ Route::get('/categories', [CategoryController::class, 'getCategories']); // GET 
 
 //rating
 Route::get('/courses/ratings/top-reviews', [RatingController::class, 'getTopReviews']); // GET TOP 3 REVIEWS
+Route::get('/courses/{course_id}/ratings', [RatingController::class, 'getCourseRatings']); // GET COURSE RATINGS
+
 
 Route::post('/register/{role}', [AuthController::class, 'register']); // REGISTER USER & INSTRUCTOR
 Route::post('/login', [AuthController::class, 'login']); // LOGIN USER
@@ -60,6 +62,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // Notifications
     Route::get('/notifications/{user_id}', [NotificationController::class, 'getNotifications']);
     Route::put('/notifications/{user_id}/{notification_id}', [NotificationController::class, 'updateNotification']);
+
+    //Rating
+    Route::post('/courses/{course_id}/rate', [RatingController::class, 'addRating']);
 });
 
 //For Admin
