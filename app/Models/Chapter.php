@@ -14,8 +14,7 @@ class Chapter extends Model
         'name', 
         'slug', 
         'file', 
-        'text', 
-        'isDone'
+        'text',
     ];
 
     public function course()
