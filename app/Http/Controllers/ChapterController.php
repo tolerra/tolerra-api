@@ -135,33 +135,50 @@ public function deleteChapter($course_id, $chapter_id)
 }
     
 
-public function getChapterDetail($course_id, $chapter_id)
+public function getChapterDetail($course_id, $chapter_id = null)
 {
-    $course = Course::findOrFail($course_id);
+    try {
+        $course = Course::findOrFail($course_id);
 
-    $chapter = Chapter::where('course_id', $course_id)->where('id', $chapter_id)->firstOrFail();
+        $chapters = Chapter::where('course_id', $course_id)->get();
 
-    $chapters = Chapter::where('course_id', $course_id)->get();
+        $formattedChapters = $chapters->map(function ($chapter) {
+            return [
+                'id' => $chapter->id,
+                'name' => $chapter->name,
+                'file' => $chapter->file ? url('storage/course_contents/' . $chapter->course_id . '/' . basename($chapter->file)) : null,
+                'text' => $chapter->text,
+            ];
+        });
 
-    $formattedChapters = $chapters->map(function ($chapter) {
-        return [
-            'id' => $chapter->id,
-            'name' => $chapter->name,
-            'file' => $chapter->file ? env('APP_URL') . '/storage/course_contents/' . basename($chapter->file) : null,
-            'text' => $chapter->text,
-        ];
-    });
+        if ($chapter_id) {
+            $chapter = $chapters->where('id', $chapter_id)->first();
 
-    // Kembalikan data dalam format JSON
-    return response()->json([
-        'message' => 'Successfully retrieved chapter details and list',
-        'chapter' => [
-            'id' => $chapter->id,
-            'name' => $chapter->name,
-            'file' => $chapter->file ? env('APP_URL') . '/storage/course_contents/' . basename($chapter->file) : null,
-            'text' => $chapter->text,
-        ], // Chapter yang sedang dibuka
-        'chapters' => $formattedChapters // List semua chapter
-    ], 200);
+            if (!$chapter) {
+                return response()->json([
+                    'message' => 'Chapter not found',
+                ], 404);
+            }
+
+            return response()->json([
+                'message' => 'Successfully retrieved chapter details and list',
+                'chapter' => $formattedChapters->where('id', $chapter_id)->first(),
+                'chapters' => $formattedChapters
+            ], 200);
+        } else {
+            return response()->json([
+                'message' => 'Successfully retrieved all chapters',
+                'chapters' => $formattedChapters
+            ], 200);
+        }
+    } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        return response()->json([
+            'message' => 'Course not found',
+        ], 404);
+    } catch (\Exception $e) {
+        return response()->json([
+            'message' => 'An error occurred while retrieving the chapter details',
+        ], 500);
+    }
 }
 }
