@@ -21,7 +21,6 @@ class ChapterSeeder extends Seeder
                     'slug' => Str::slug('Chapter ' . rand(1, 10)),
                     'file' => 'chapter_file.pdf',
                     'text' => 'This is the text of the chapter',
-                    'isDone' => rand(0, 1),
                 ]);
             }
         }
