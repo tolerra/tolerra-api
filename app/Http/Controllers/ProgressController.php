@@ -5,37 +5,34 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Progress;
 use App\Models\Enrollment;
-use App\Models\Chapter;
 
 class ProgressController extends Controller
 {
-    public function addProgress(Request $request)
+    public function markChapterAsDone($course_id, $chapter_id, Request $request)
     {
         $request->validate([
-            'chapter_id' => 'required|exists:chapters,id',
             'enrollment_id' => 'required|exists:enrollments,id',
         ]);
 
         $progress = Progress::create([
-            'chapter_id' => $request->chapter_id,
+            'chapter_id' => $chapter_id,
             'enrollment_id' => $request->enrollment_id,
             'isFinish' => true, // Set default progress to true
         ]);
 
         return response()->json([
-            'message' => 'Progress added successfully',
+            'message' => 'Chapter marked as done successfully',
             'progress' => $progress
         ], 201);
     }
 
-    public function getProgress(Request $request)
+    public function checkChapterProgress($course_id, $chapter_id, Request $request)
     {
         $request->validate([
-            'chapter_id' => 'required|exists:chapters,id',
             'enrollment_id' => 'required|exists:enrollments,id',
         ]);
 
-        $progress = Progress::where('chapter_id', $request->chapter_id)
+        $progress = Progress::where('chapter_id', $chapter_id)
                             ->where('enrollment_id', $request->enrollment_id)
                             ->first();
 
@@ -44,7 +41,7 @@ class ProgressController extends Controller
         ]);
     }
 
-    public function getEnrollmentProgress($enrollment_id)
+    public function checkCourseProgress($course_id, $enrollment_id)
     {
         $enrollment = Enrollment::findOrFail($enrollment_id);
         $course = $enrollment->course;
