@@ -202,59 +202,70 @@ class CourseController extends Controller
     }
 
     public function updateCourse(Request $request, $id)
-    {
-        try {
-            $user = Auth::user();
-            if (!$user || $user->role !== 'instructor') {
-                return response()->json([
-                    'message' => 'Unauthorized. Only instructors can access this endpoint.'
-                ], 403);
-            }
-
-            // Input validation
-            $validator = Validator::make($request->all(), [
-                'name' => 'sometimes|string|max:255',
-                'desc' => 'sometimes|string',
-                'brief' => 'sometimes|string',
-                'image' => 'sometimes|image|mimes:jpeg,png,jpg,gif|max:2048',
-                'category_id' => 'sometimes|exists:categories,id',
-            ]);
-
-            if ($validator->fails()) {
-                return response()->json([
-                    'message' => 'Validation failed',
-                    'errors' => $validator->errors()
-                ], 422);
-            }
-
-            // Find the course
-            $course = Course::findOrFail($id);
-
-            // Handle file upload
-            if ($request->hasFile('image')) {
-                $image = $request->file('image');
-                $imageName = time() . '.' . $image->getClientOriginalExtension();
-                $image->storeAs('public/course_images', $imageName);
-                $course->image = $imageName;
-            }
-
-            $course->name = $request->name ?? $course->name;
-            $course->fill($request->only(['name', 'desc', 'brief', 'category_id']));
-            $course->slug = Str::slug($request->name);
-            $course->save();
-
+{
+    try {
+        $user = Auth::user();
+        if (!$user || $user->role !== 'instructor') {
             return response()->json([
-                'message' => 'Course updated successfully',
-                'course' => $course
-            ], 200);
-        } catch (\Exception $e) {
-            Log::error('Error updating course: ' . $e->getMessage());
-            return response()->json([
-                'message' => 'An error occurred while updating the course. Please try again later.'
-            ], 500);
+                'message' => 'Unauthorized. Only instructors can access this endpoint.'
+            ], 403);
         }
-    }
 
+        // Validasi input
+        $validator = Validator::make($request->all(), [
+            'name' => 'nullable|string|max:255',
+            'desc' => 'nullable|string',
+            'brief' => 'nullable|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'category_id' => 'nullable|exists:categories,id',
+        ]);
+
+        // Cek jika validasi gagal
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        // Temukan course
+        $course = Course::findOrFail($id);
+
+        // Data untuk update
+        $data = [
+            'name' => $request->input('name', $course->name),
+            'desc' => $request->input('desc', $course->desc),
+            'brief' => $request->input('brief', $course->brief),
+            'category_id' => $request->input('category_id', $course->category_id),
+        ];
+
+        // Tangani upload file jika ada
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $imageName = time() . '.' . $image->getClientOriginalExtension();
+            $destinationPath = public_path('course_images');
+            $image->move($destinationPath, $imageName);
+            $data['image'] = $imageName; // Simpan nama file gambar yang baru
+        }
+
+        // Update course
+        $course->update($data);
+
+        // Update slug
+        $course->slug = Str::slug($course->name);
+        $course->save();
+
+        return response()->json([
+            'message' => 'Course updated successfully',
+            'course' => $course
+        ], 200);
+    } catch (\Exception $e) {
+        Log::error('Error updating course: ' . $e->getMessage());
+        return response()->json([
+            'message' => 'An error occurred while updating the course. Please try again later.'
+        ], 500);
+    }
+}
 
 public function deleteCourse($id)
 {
