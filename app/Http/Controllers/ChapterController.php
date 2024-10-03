@@ -53,7 +53,6 @@ class ChapterController extends Controller
             'slug' => Str::slug($request->name),
             'file' => $filePath ?? null,
             'text' => $request->text,
-            'isDone' => false,
         ]);
 
         return response()->json([
@@ -157,7 +156,6 @@ public function deleteChapter($course_id, $chapter_id)
         'name' => $selectedChapter->name,
         'file' => $selectedChapter->file ? env('APP_URL') . '/storage/course_contents/' . basename($selectedChapter->file) : null, // Menyediakan URL file jika ada
         'text' => $selectedChapter->text,
-        'isDone' => $selectedChapter->isDone,
     ];
 
     // Format semua chapters
@@ -167,7 +165,6 @@ public function deleteChapter($course_id, $chapter_id)
             'name' => $chapter->name,
             'file' => $chapter->file ? env('APP_URL') . '/storage/course_contents/' . basename($chapter->file) : null, // Menyediakan URL file jika ada
             'text' => $chapter->text,
-            'isDone' => $chapter->isDone,
         ];
     });
 

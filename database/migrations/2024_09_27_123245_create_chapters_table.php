@@ -18,7 +18,6 @@ return new class extends Migration
             $table->string('slug');
             $table->string('file')->nullable();
             $table->text('text');
-            $table->boolean('isDone')->default(false);
             $table->timestamps();
         });
         

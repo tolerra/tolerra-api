@@ -14,8 +14,10 @@ return new class extends Migration
         Schema::create('disability_verifications', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->string('file_path')->nullable();
+            $table->boolean('is_verified')->default(false);
             $table->timestamps();
-        });        
+        });
     }
 
     /**
