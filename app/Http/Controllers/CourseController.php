@@ -9,9 +9,20 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Enrollment;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Http\UploadedFile;
+use App\Http\Controllers\CloudinaryController;
+
 
 class CourseController extends Controller
 {
+
+    protected $cloudinaryController;
+
+    public function __construct(CloudinaryController $cloudinaryController)
+    {
+        $this->cloudinaryController = $cloudinaryController;
+    }
+
     public function getRecommendation()
     {
         $courses = Course::with(['instructor', 'category'])
@@ -176,13 +187,6 @@ class CourseController extends Controller
             ], 422);
         }
 
-        // Handle file upload
-        if ($request->hasFile('image')) {
-            $image = $request->file('image');
-            $imageName = time() . '.' . $image->getClientOriginalExtension();
-            $image->storeAs('public/course_images', $imageName);
-        }
-
         // Buat course baru
         $course = Course::create([
             'name' => $request->name,
@@ -194,6 +198,21 @@ class CourseController extends Controller
             'category_id' => $request->category_id,
             'isValidated' => false,
         ]);
+
+        // Handle file upload
+        if ($request->hasFile('image')) {
+            $base64File = $request->image;
+            $fileData = base64_decode($base64File);
+            $tempFilePath = sys_get_temp_dir() . '/' . uniqid() . '.jpg';
+            file_put_contents($tempFilePath, $fileData);
+    
+            $tempFile = new UploadedFile($tempFilePath, 'course_image.jpg', 'image/jpeg', null, true);
+    
+            $uploadedFileUrl = $this->cloudinaryController->upload($tempFile, 'course_images');
+            $course->image = $uploadedFileUrl;
+    
+            unlink($tempFilePath);
+        }
 
         return response()->json([
             'message' => 'Course created successfully',
@@ -239,13 +258,19 @@ class CourseController extends Controller
             'category_id' => $request->input('category_id', $course->category_id),
         ];
 
-        // Tangani upload file jika ada
+        // Handle file upload
         if ($request->hasFile('image')) {
-            $image = $request->file('image');
-            $imageName = time() . '.' . $image->getClientOriginalExtension();
-            $destinationPath = public_path('course_images');
-            $image->move($destinationPath, $imageName);
-            $data['image'] = $imageName; // Simpan nama file gambar yang baru
+            $base64File = $request->image;
+            $fileData = base64_decode($base64File);
+            $tempFilePath = sys_get_temp_dir() . '/' . uniqid() . '.jpg';
+            file_put_contents($tempFilePath, $fileData);
+    
+            $tempFile = new UploadedFile($tempFilePath, 'course_image.jpg', 'image/jpeg', null, true);
+    
+            $uploadedFileUrl = $this->cloudinaryController->upload($tempFile, 'course_images');
+            $course->image = $uploadedFileUrl;
+    
+            unlink($tempFilePath);
         }
 
         // Update course

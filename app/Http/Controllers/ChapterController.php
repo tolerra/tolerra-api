@@ -129,7 +129,7 @@ class ChapterController extends Controller
             ], 500);
         }
     }
-     
+    
 public function deleteChapter($course_id, $chapter_id)
 {
     $user = Auth::user();
