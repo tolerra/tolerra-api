@@ -10,19 +10,16 @@ class ProgressController extends Controller
 {
     public function createProgress($enrollment_id, $chapter_id, Request $request)
     {
-        $request->validate([
-            'enrollment_id' => 'required|exists:enrollments,id',
-            'chapter_id' => 'required|exists:chapters,id',
-        ]);
-
-        $progress = Progress::create([
+        $progress = Progress::firstOrNew([
             'chapter_id' => $chapter_id,
             'enrollment_id' => $enrollment_id,
-            'isFinish' => true, 
         ]);
-
+    
+        $progress->isFinish = true;
+        $progress->save();
+    
         return response()->json([
-            'message' => 'Progress created successfully',
+            'message' => 'Progress created or updated successfully',
             'progress' => $progress
         ], 201);
     }
