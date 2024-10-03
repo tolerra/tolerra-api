@@ -38,8 +38,20 @@ class EnrollmentController extends Controller
     public function getEnrolledCourses()
     {
         $user = Auth::user();
-        $enrollments = Enrollment::where('student_id', $user->id)->with('course')->get();
-
+        $enrollments = Enrollment::where('student_id', $user->id)
+            ->with(['course.ratings'])
+            ->get();
+    
+        $enrollments = $enrollments->map(function ($enrollment) {
+            $course = $enrollment->course;
+            $averageRating = $course->ratings->avg('rating') ?? 0;
+            return [
+                'enrollment' => $enrollment,
+                'course' => $course,
+                'average_rating' => $averageRating,
+            ];
+        });
+    
         return response()->json($enrollments, 200);
     }
 }
