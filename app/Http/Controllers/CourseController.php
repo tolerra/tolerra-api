@@ -31,30 +31,43 @@ class CourseController extends Controller
     public function getCourse(Request $request)
     {
         $user = $request->user();
+        
+        // Query base on user role
         if (!$user || $user->role !== 'admin') {
+            // User bukan admin, hanya mengambil course yang sudah divalidasi
             $query = Course::with(['instructor', 'category'])->where('isValidated', true);
-        } else{
+        } else {
+            // Admin, mengambil course yang belum divalidasi
             $query = Course::with(['instructor', 'category'])->where('isValidated', false);
         }
-        
-
+    
+        // Filter berdasarkan pencarian
         if ($request->has('search')) {
             $search = $request->input('search');
             $query->where('name', 'like', "%{$search}%");
         }
-
-        $courses = $query->get()->map(function ($course) use ($user) {
-            if ($user && $user->courses()->where('id', $course->id)->exists()) {
-                return null;
-            }
+    
+        // Ambil courses dari query
+        $courses = $query->get();
+    
+        // Filter courses jika user sudah memiliki course tersebut (untuk non-admin)
+        if ($user && $user->role !== 'admin') {
+            $courses = $courses->filter(function ($course) use ($user) {
+                // Jika user sudah memiliki course ini, kita hilangkan dari hasil
+                return !$user->courses()->where('id', $course->id)->exists();
+            });
+        }
+    
+        // Format course data
+        $formattedCourses = $courses->map(function ($course) {
             return $this->formatCourseData($course);
-        })->filter()->values();
-
+        });
+    
         return response()->json([
             'message' => "Successfully retrieved courses",
-            'courses' => $courses
+            'courses' => $formattedCourses
         ]);
-    }
+    }    
 
     public function getEnrolledDetailCourse($course_id)
     {
