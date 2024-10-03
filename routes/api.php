@@ -75,7 +75,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/courses/{course_id}/rate', [RatingController::class, 'addRating']);
 
     //Progress
-    Route::post('/{enrollment_id}/courses/{course_id}/chapters/{chapter_id}/progress', [ProgressController::class, 'markChapterAsDone']);
+    Route::post('/{enrollment_id}/courses/{course_id}/chapters/{chapter_id}/done', [ProgressController::class, 'markChapterAsDone']);
     Route::get('/{enrollment_id}/courses/{course_id}/chapters/{chapter_id}/progress', [ProgressController::class, 'checkChapterProgress']);
     Route::get('/{enrollment_id}/courses/{course_id}/progress', [ProgressController::class, 'checkCourseProgress']);
 
