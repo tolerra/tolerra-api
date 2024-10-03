@@ -253,6 +253,7 @@ class CourseController extends Controller
 
         // Update slug
         $course->slug = Str::slug($course->name);
+        $course->update(['isVerified' => false]);
         $course->save();
 
         return response()->json([
