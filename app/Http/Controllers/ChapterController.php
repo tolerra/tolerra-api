@@ -13,6 +13,12 @@ class ChapterController extends Controller
 {
     public function addChapter(Request $request, $course_id)
     {
+        $user = Auth::user();
+        if (!$user || $user->role !== 'instructor') {
+            return response()->json([
+                'message' => 'Unauthorized. Only instructors can access this endpoint.'
+            ], 403);
+        }
         // Validasi bahwa user adalah instructor dari course ini
         $course = Course::findOrFail($course_id);
         if ($course->instructor_id !== Auth::id()) {
@@ -55,6 +61,85 @@ class ChapterController extends Controller
             'chapter' => $chapter
         ], 201);
     }
+
+public function updateChapter(Request $request, $course_id, $chapter_id)
+{
+    $user = Auth::user();
+    if (!$user || $user->role !== 'instructor') {
+        return response()->json([
+            'message' => 'Unauthorized. Only instructors can access this endpoint.'
+        ], 403);
+    }
+    // Validasi bahwa user adalah instructor dari course ini
+    $course = Course::findOrFail($course_id);
+    if ($course->instructor_id !== Auth::id()) {
+        return response()->json(['message' => 'Unauthorized'], 403);
+    }
+
+    // Validasi input
+    $validator = Validator::make($request->all(), [
+        'name' => 'required|string|max:255',
+        'file' => 'file|mimes:pdf,doc,docx,ppt,pptx,mp4,mov,avi|max:102400', // 100MB max
+        'text' => 'required|string',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json([
+            'message' => 'Validation failed',
+            'errors' => $validator->errors()
+        ], 422);
+    }
+
+    // Find the chapter
+    $chapter = Chapter::where('course_id', $course_id)->findOrFail($chapter_id);
+
+    // Handle file upload
+    if ($request->hasFile('file')) {
+        $file = $request->file('file');
+        $fileName = time() . '_' . $file->getClientOriginalName();
+        $filePath = $file->storeAs('public/course_contents', $fileName);
+        $chapter->file = $filePath;
+    }
+
+    // Update chapter details
+    $chapter->name = $request->name;
+    $chapter->slug = Str::slug($request->name);
+    $chapter->text = $request->text;
+    $chapter->save();
+
+    return response()->json([
+        'message' => 'Chapter updated successfully',
+        'chapter' => $chapter
+    ], 200);
+}
+
+public function deleteChapter($course_id, $chapter_id)
+{
+    $user = Auth::user();
+    if (!$user || $user->role !== 'instructor') {
+        return response()->json([
+            'message' => 'Unauthorized. Only instructors can access this endpoint.'
+        ], 403);
+    }
+    // Validasi bahwa user adalah instructor dari course ini
+    $course = Course::findOrFail($course_id);
+    if ($course->instructor_id !== Auth::id()) {
+        return response()->json(['message' => 'Unauthorized'], 403);
+    }
+
+    // Find the chapter
+    $chapter = Chapter::where('course_id', $course_id)->findOrFail($chapter_id);
+
+    // Delete the chapter
+    $chapter->delete();
+
+    return response()->json([
+        'message' => 'Chapter deleted successfully'
+    ], 200);
+}
+    
+
+
     public function getChapterDetail($course_id, $chapter_id)
 {
     // Cek apakah course ada

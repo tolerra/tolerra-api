@@ -153,10 +153,11 @@ class CourseController extends Controller
 
     public function addCourse(Request $request)
     {
-        if (!Auth::check()) {
+        $user = Auth::user();
+        if (!$user || $user->role !== 'instructor') {
             return response()->json([
-                'message' => 'Unauthorized'
-            ], 401);
+                'message' => 'Unauthorized. Only instructors can access this endpoint.'
+            ], 403);
         }
 
         // Validasi input
@@ -200,6 +201,72 @@ class CourseController extends Controller
         ], 201);
     }
 
+    public function updateCourse(Request $request, $id)
+{
+    $user = Auth::user();
+    if (!$user || $user->role !== 'instructor') {
+        return response()->json([
+            'message' => 'Unauthorized. Only instructors can access this endpoint.'
+        ], 403);
+    }
+
+    // Validasi input
+    $validator = Validator::make($request->all(), [
+        'name' => 'required|string|max:255',
+        'desc' => 'required|string',
+        'brief' => 'required|string',
+        'image' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+        'category_id' => 'required|exists:categories,id',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json([
+            'message' => 'Validation failed',
+            'errors' => $validator->errors()
+        ], 422);
+    }
+
+    $course = Course::findOrFail($id);
+
+    // Handle file upload
+    if ($request->hasFile('image')) {
+        $image = $request->file('image');
+        $imageName = time() . '.' . $image->getClientOriginalExtension();
+        $image->storeAs('public/course_images', $imageName);
+        $course->image = $imageName;
+    }
+
+    $course->name = $request->name;
+    $course->slug = Str::slug($request->name);
+    $course->desc = $request->desc;
+    $course->brief = $request->brief;
+    $course->category_id = $request->category_id;
+    $course->save();
+
+    return response()->json([
+        'message' => 'Course updated successfully',
+        'course' => $course
+    ]);
+}
+
+public function deleteCourse($id)
+{
+    $user = Auth::user();
+    if (!$user || $user->role !== 'instructor') {
+        return response()->json([
+            'message' => 'Unauthorized. Only instructors can access this endpoint.'
+        ], 403);
+    }
+
+    $course = Course::findOrFail($id);
+    $course->delete();
+
+    return response()->json([
+        'message' => 'Course deleted successfully'
+    ]);
+}
+
+
     private function formatCourseData($course)
     {
         return [
@@ -218,5 +285,5 @@ class CourseController extends Controller
             'created_at' => $course->created_at,
             'updated_at' => $course->updated_at,
         ];
-    }
+    }    
 }
