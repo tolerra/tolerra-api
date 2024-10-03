@@ -31,30 +31,24 @@ class CourseController extends Controller
     public function getCourse(Request $request)
     {
         $user = $request->user();
-        switch ($user->role) {
-            case 'admin':
-                $query = Course::with(['instructor', 'category'])->where('isValidated', false);
-                break;
-            case 'instructor':
-                $query = Course::with(['instructor', 'category'])->where('id', $user->id);
-                break;
-            default:
-                $query = Course::with(['instructor', 'category'])->where('isValidated', true);
-                break;
+        
+        if ($user && $user->role === 'admin') {
+            $query = Course::with(['instructor', 'category'])->where('isValidated', false);
+        } elseif ($user && $user->role === 'instructor') {
+            $query = Course::with(['instructor', 'category'])->where('instructor_id', $user->id);
+        } else {
+            $query = Course::with(['instructor', 'category'])->where('isValidated', true);
         }
-
+    
         if ($request->has('search')) {
             $search = $request->input('search');
             $query->where('name', 'like', "%{$search}%");
         }
-
+    
         $courses = $query->get()->map(function ($course) use ($user) {
-            if ($user && $user->courses()->where('id', $course->id)->exists()) {
-                return null;
-            }
             return $this->formatCourseData($course);
-        })->filter()->values();
-
+        });
+    
         return response()->json([
             'message' => "Successfully retrieved courses",
             'courses' => $courses
