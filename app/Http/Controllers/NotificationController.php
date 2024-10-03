@@ -17,7 +17,7 @@ class NotificationController extends Controller
     {
         $notification = Notification::where('user_id', $user_id)->findOrFail($notification_id);
 
-        $notification->update(array_merge($request->all(), ['is_read' => true]));
+        $notification->update(array_merge($request->all(), ['read' => true]));
 
         return response()->json($notification);
     }
